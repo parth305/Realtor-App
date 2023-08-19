@@ -10,6 +10,6 @@ export class AuthController {
   Signup(@Body() body: UserSignupDTO) {
     console.log(body);
 
-    return this.authService.signup();
+    return this.authService.signup(body);
   }
 }
