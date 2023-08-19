@@ -1,4 +1,4 @@
-import { IsString,IsPhoneNumber,IsStrongPassword,IsEnum,IsNotEmpty ,IsEmail} from "class-validator";
+import { IsString,IsPhoneNumber,IsStrongPassword,IsEnum,IsNotEmpty ,IsEmail, IsOptional} from "class-validator";
 
 
 enum UserType{
@@ -7,6 +7,16 @@ enum UserType{
     ADMIN="ADMIN"
   }
 
+
+  export class UserSigninDTO{
+
+    @IsEmail()
+    @IsString()
+    email:string;
+
+    @IsStrongPassword()
+    password:string;
+  }
 
 export class UserSignupDTO{
 
@@ -23,7 +33,18 @@ export class UserSignupDTO{
     @IsStrongPassword()
     password:string;
 
-    @IsEnum(UserType)
-    user_type:string;
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
+    productKey?:string;
+}
 
+
+export class GenerateProductKeyDTO{
+
+  @IsEmail()
+  email:string;
+
+  @IsEnum(UserType)
+  userType:UserType;
 }
