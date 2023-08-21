@@ -1,6 +1,7 @@
 import {
   ConflictException,
   BadRequestException,
+  NotFoundException,
   Injectable,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -8,6 +9,7 @@ import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 
 import { UserType } from '@prisma/client';
+import { UserResponse } from 'src/dtos/user.dto';
 
 interface SignupParams {
   name: string;
@@ -34,6 +36,14 @@ export class AuthService {
 
     if (userExsts) {
       throw new ConflictException('User already exists');
+    }
+
+    const userPhoneExists = await this.prismaService.user.findUnique({
+      where: { phone },
+    });
+
+    if (userPhoneExists) {
+      throw new ConflictException('Phone Number Already taken');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -84,5 +94,19 @@ export class AuthService {
     const str = `${email}-${userType}-${process.env.PRODUCT_KEY_SECRET}`;
 
     return await bcrypt.hash(str, 10);
+  }
+
+  async me(id:number){
+    const user=await this.prismaService.user.findUnique({
+      where:{
+        id
+      }
+    })
+
+    if(!user){
+      throw new NotFoundException();
+    }
+
+    return new UserResponse(user);
   }
 }

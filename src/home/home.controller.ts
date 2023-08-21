@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseIntPipe, Post, Put,Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, BadRequestException, ParseIntPipe, Post, Put,Query } from '@nestjs/common';
 import { HomeService } from './home.service';
 import { PropertyType } from '@prisma/client';
-import { CreateHomeDTO } from 'src/dtos/home.dto';
+import { CreateHomeDTO, UpdateHomeDTO } from 'src/dtos/home.dto';
+import { User, UserInfo } from 'src/decorators/user.decorator';
 
 @Controller('home')
 export class HomeController {
@@ -35,17 +36,32 @@ export class HomeController {
     }
 
     @Post()
-    createHome(@Body() body:CreateHomeDTO){
-        return this.homeService.createHome(body);
+    createHome(@Body() body:CreateHomeDTO,@User() user:UserInfo){
+        return this.homeService.createHome(body,user.id);
     }
 
     @Put(":id")
-    updateHome(){
-        return {}
+    async updateHome(
+        @Param("id",ParseIntPipe) id:number,
+        @Body() body:UpdateHomeDTO,
+        @User() user:UserInfo
+    ){
+        const realtorId=await this.homeService.getRealtorByHomeId(id);
+
+        if(user.id!==realtorId){
+            throw new BadRequestException()
+        }
+        return this.homeService.updateHome(id,body);
     }
 
     @Delete(":id")
-    deleteHome(){
-        return {}
+    async deleteHome(@Param("id",ParseIntPipe) id:number,
+    @User() user:UserInfo){
+        const realtorId=await this.homeService.getRealtorByHomeId(id);
+
+        if(user.id!==realtorId){
+            throw new BadRequestException()
+        }
+        return this.homeService.deleteHomeById(id);
     }
 }
