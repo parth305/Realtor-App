@@ -86,7 +86,7 @@ export class AuthService {
 
   private generateJWT(id: Number) {
     return jwt.sign({ id }, process.env.JWT_SECRET_KEY, {
-      expiresIn: 3600 * 24,
+      expiresIn: 3600 * 24*7,
     });
   }
 
